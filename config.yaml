@@ -1,0 +1,18 @@
+#plugin information
+id: EnhancedInclude
+name: EnhancedInclude
+version: 0.1.0
+
+#about this plugin
+description: <__trans phrase="Extends mt:Include">
+author_name: <__trans phrase="toi-planning">
+author_link: http://tec.toi-planning.net/
+plugin_link: http://tec.toi-planning.net/mt/enhancedinclude/
+doc_link: http://tec.toi-planning.net/mt/enhancedinclude/manual
+
+#Localization
+l10n_class: EnhancedInclude::L10N
+
+tags:
+    function:
+        Include: $EnhancedInclude::EnhancedInclude::_hdlr_include
