@@ -13,6 +13,15 @@ doc_link: http://tec.toi-planning.net/mt/enhancedinclude/manual
 #Localization
 l10n_class: EnhancedInclude::L10N
 
+settings:
+    allow_execute:
+        default: ""
+
+blog_config_template: blog_config.tmpl
+
 tags:
     function:
         Include: $EnhancedInclude::EnhancedInclude::_hdlr_include
+    modifier:
+        pipe:
+            handler: $EnhancedInclude::EnhancedInclude::_fltr_pipe

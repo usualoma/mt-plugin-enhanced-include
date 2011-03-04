@@ -23,9 +23,19 @@
 package EnhancedInclude;
 
 use Digest::MD5 qw( md5_hex );
+use IPC::Open2;
 
 use strict;
 use warnings;
+
+sub _get_blog_id {
+    my ($ctx) = @_;
+    $ctx->stash('blog_id') or do {
+        if (my $blog = $ctx->stash('blog')) {
+            $blog->id
+        }
+    };
+}
 
 sub _hdlr_include {
     my ($ctx, $arg, $cond) = @_;
@@ -45,18 +55,25 @@ sub _hdlr_include {
 
 sub _hdlr_include_execute {
     my ($ctx, $arg, $cond) = @_;
-    my $exec = $arg->{execute};
-    my $cache_key = md5_hex('include_execute::' . $exec);
-    my $params = $arg->{params} || [];
-    if (! ref $params) {
-        $params = [ $params ];
+    my $blog_id = &_get_blog_id($ctx)
+        or return '';
+    my $plugin = MT->component('EnhancedInclude');
+    if (! $plugin->get_config_value('allow_execute', 'blog:' . $blog_id)) {
+        return $ctx->error($plugin->translate(
+            '"execute" attribute is not allowed.'
+        ));
     }
+    my $exec = $arg->{execute};
+    if (! ref $exec) {
+        $exec = [ $exec ];
+    }
+    my $cache_key = md5_hex('include_execute::' . join('', @$exec));
 
     if (my $cached = &_get_cache($cache_key, @_)) {
         return $cached;
     }
 
-    my $value = do{ open(my $fh, '-|', $exec, @$params); local $/; <$fh> };
+    my $value = do{ open(my $fh, '-|', @$exec); local $/; <$fh> };
 
     &_set_cache($cache_key, $value, @_);
 }
@@ -112,6 +129,32 @@ sub _set_cache {
     $cache_driver->replace($cache_key, $value, $ttl);
 
     $value;
+}
+
+sub _fltr_pipe {
+    my ($str, $args, $ctx) = @_;
+    if (! ref $args) {
+        $args = [ $args ];
+    }
+    my $plugin = MT->component('EnhancedInclude');
+    my $blog_id = &_get_blog_id($ctx)
+        or return '';
+    if (! $plugin->get_config_value('allow_execute', 'blog:' . $blog_id)) {
+        die $plugin->translate('"execute" attribute is not allowed.');
+    }
+
+    my $pid = open2(my $out, my $in, @$args);
+
+    print($in $str);
+    close($in);
+
+    local $/;
+    my $content = <$out>;
+    close($out);
+
+    waitpid($pid, 0);
+
+    $content;
 }
 
 1;

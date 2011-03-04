@@ -7,15 +7,20 @@ A Plugin that add some modifiers to mt:Include.
 * Include, and cache execution result of command.
 * Include, and cache other site's resource.
 
+## INSTALATION
+
+* Upload plugin's files.
+* Configure blog settings if using "execute" attributes.
+
 ## SYNOPSIS
 ### execute
-	<mt:Include execute="php" params="$filename","$arg1","$arg2" ttl="3600" />
+	<mt:Include execute="php","$filename","$arg1","$arg2" ttl="3600" />
 ### url
 	<mt:Include url="http://localhost/some/part.php" ttl="3600" />
 	
 ## LICENSE
 
-Copyright (c) 2011 Taku AMANO
+Copyright (c) 2011 ToI Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
